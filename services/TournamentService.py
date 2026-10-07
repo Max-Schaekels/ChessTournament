@@ -1,3 +1,6 @@
+from datetime import date
+
+from models.Player import Player
 from models.Tournament import Tournament
 
 
@@ -119,5 +122,89 @@ class TournamentService:
         print("Players:")
         for player in target_tournament.players:
             print(f"- {player.username}")
+
+    def register_tournament(self, player, tournament):
+        if tournament.status != "Waiting for players":
+            print("You can't register in this tournament")
+            return
+        if player.gender == "male" and tournament.women_only:
+            print("You can't register in this tournament, it's for women only")
+            return
+
+        if len(tournament.players) == tournament.max_players :
+            print("The tournament is full")
+            return
+
+        if player in tournament.players:
+            print("You are already registered")
+            return
+
+        if player.elo < tournament.min_elo:
+            print("Your elo is too low for this tournament")
+            return
+
+        if player.elo > tournament.max_elo:
+            print("Your elo is too high for this tournament")
+            return
+
+        today = date.today()
+
+        age = today.year - player.date_of_birth.year - ((today.month, today.day) < (player.date_of_birth.month, player.date_of_birth.day))
+
+        if age < 18:
+            category = "Junior"
+        elif age < 60:
+            category = "Senior"
+        else:
+            category = "Veteran"
+
+        if category not in tournament.categories:
+            print(f"Your category {category} is not in the tournament categories : {tournament.categories}")
+            return
+
+        tournament.add_player(player)
+
+    def unregister_tournament(self, player, tournament):
+        if tournament.status != "Waiting for players":
+            print("You can't unregister in this tournament")
+            return
+
+        if player not in tournament.players:
+            print("You are not registered in this tournament")
+
+        tournament.remove_player(player)
+
+    def remove_tournament(self,tournament):
+        if tournament not in self._tournaments:
+            print("This tournament does not exist")
+
+        if tournament.status != "Waiting for players":
+            print("You can't unregister in this tournament, it's already started or finished")
+
+        self._tournaments.remove(tournament)
+
+    def start_tournament(self, tournament):
+        if tournament.status != "Waiting for players":
+            print("Tournament has already started")
+            return False
+
+        if len(tournament.players) < tournament.min_players:
+            print("Not enough players to start the tournament")
+            return False
+
+        tournament.start_tournament()
+
+        print("Tournament started")
+        return True
+
+
+
+
+
+
+
+
+
+
 
 

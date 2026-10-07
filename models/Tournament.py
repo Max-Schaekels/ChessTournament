@@ -146,6 +146,9 @@ class Tournament:
         self._touch()
 
     def start_tournament(self):
+        if len(self.players < self.min_players) :
+            print("The minimum player requirement is not reached, you can't start the tournament.")
+            return
         self._status = "In progress"
         self._current_round = 1
         self._touch()
