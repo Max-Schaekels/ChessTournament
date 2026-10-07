@@ -4,7 +4,7 @@ from models.Player import Player
 
 
 class Tournament:
-    def __init__(self,name: str,location, min_players,max_players,min_elo,max_elo,categories,women_only=False):
+    def __init__(self, name: str, location, min_players, max_players, min_elo, max_elo, categories, women_only=False):
         self.name = name
         self.location = location
 
@@ -27,7 +27,6 @@ class Tournament:
 
         self._created_at = datetime.now()
         self._updated_at = self._created_at
-
 
         self._players = []
 
@@ -115,22 +114,18 @@ class Tournament:
     def add_player(self, player):
         if not isinstance(player, Player):
             raise ValueError("Invalid player type")
+
         if player not in self._players:
             self._players.append(player)
-        if self.status != "Waiting for players":
-            print(f"You can't register to this Tournament anymore")
-        else :
-            print(f"Player {player.username} already in the tournament")
+            self._touch()
 
     def remove_player(self, player):
         if not isinstance(player, Player):
             raise ValueError("Invalid player type")
-        if player not in self._players:
-            raise ValueError(f"Player {player.username} not in the tournament")
-        if self.status != "Waiting for players":
-            print(f"You can't unregister to this Tournament anymore")
-        else:
+
+        if player in self._players:
             self._players.remove(player)
+            self._touch()
 
     def _touch(self):
         self._updated_at = datetime.now()
@@ -138,20 +133,20 @@ class Tournament:
     def can_be_deleted(self):
         return self.status == "Waiting for players"
 
-    def _touch(self):
-        self._updated_at = datetime.now()
-
     def next_round(self):
         self._current_round += 1
         self._touch()
 
     def start_tournament(self):
-        if len(self.players < self.min_players) :
+        if len(self.players) < self.min_players:
             print("The minimum player requirement is not reached, you can't start the tournament.")
-            return
+            return False
+
         self._status = "In progress"
         self._current_round = 1
         self._touch()
+
+        return True
 
     def complete_tournament(self):
         self._status = "Completed"
